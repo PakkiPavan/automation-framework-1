@@ -12,7 +12,7 @@
         "testCaseId": "10001",
         "description": "Some Test Case Description Some Test Case Description",
         "failureReason": {
-            "name": "SessionNotCreatedException"
+            "name": "SessionNotCreatedException1"
         },
         "executionStatus": "PASSED",
         "executionDate": "2023-11-01T19:00:11.000+00:00"
@@ -30,7 +30,7 @@
         "testCaseId": "10002",
         "description": "Some Test Case Description Some Test Case Description",
         "failureReason": {
-            "name": "SessionNotCreatedException"
+            "name": "SessionNotCreatedException4"
         },
         "executionStatus": "FAILED",
         "executionDate": "2023-11-01T19:00:11.000+00:00"
@@ -48,7 +48,7 @@
         "testCaseId": "10003",
         "description": "Some Test Case Description Some Test Case Description",
         "failureReason": {
-            "name": "SessionNotCreatedException"
+            "name": "SessionNotCreatedException3"
         },
         "executionStatus": "PASSED",
         "executionDate": "2023-12-01T19:00:11.000+00:00"
@@ -66,7 +66,7 @@
         "testCaseId": "10004",
         "description": "Some Test Case Description Some Test Case Description",
         "failureReason": {
-            "name": "SessionNotCreatedException"
+            "name": "SessionNotCreatedException5"
         },
         "executionStatus": "PASSED",
         "executionDate": "2023-08-01T19:00:11.000+00:00"
@@ -91,7 +91,7 @@
     },
     {
         "project": {
-            "name": "Project1"
+            "description": "Project1"
         },
         "environment": {
             "description": "Environment3"

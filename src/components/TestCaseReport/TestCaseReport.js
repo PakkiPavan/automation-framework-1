@@ -101,6 +101,7 @@ const TestCaseReport = () => {
     const [selectedTab, setSelectedTab] = React.useState(tabs[0]);
     const [pieChartData, setPieChartData] = React.useState([]);
     const [anchorEl, setAnchorEl] = React.useState(null);
+    const [pieChartsData, setPieChartsData] = React.useState([]);
     const [dialog, setDialog] = React.useState({
         open: false,
         title: "",
@@ -176,10 +177,10 @@ const TestCaseReport = () => {
                             project: testCase.project ? testCase.project.description : null,
                             test_case_id: testCase.testCaseId,
                             description: testCase.description,
-                            failureReason: testCase.failureReason ? (
+                            failureReason: testCase.executionStatus === "FAILED" && testCase.failureReason ? (
                                 <button className="button-link" onClick={() => showExceptionDialog(testCase.failureReason.name)}>Show Exception</button>
                             ) : null,
-                            failureReasonText: testCase.failureReason ? testCase.failureReason.name : null,
+                            failureReasonText: testCase.failureReason ? testCase.failureReason.name : "",
                             executionStatus: testCase.executionStatus,
                             environment: testCase.environment.name,
                             execution_status: (
@@ -228,6 +229,7 @@ const TestCaseReport = () => {
                     })
 
                     setTestCaseData(testCaseData);
+                    formPieChartsData(testCaseData);
                     setCurrentTestCaseData(testCaseData);
                 }
             })
@@ -241,6 +243,37 @@ const TestCaseReport = () => {
         updatePieChartData();
         // eslint-disable-next-line
     }, [currentTestCaseData])
+
+    const formPieChartsData = (testCaseData) => {
+        console.log("testCaseData", testCaseData);
+        const allPieChartsData = [];
+
+        const allProjectWiseData = testCaseData.reduce((acc, obj) => {
+            if (!acc[obj.project]) {
+                acc[obj.project] = [];
+            }
+            acc[obj.project].push(obj);
+            return acc;
+        }, {});
+
+        console.log(allProjectWiseData);
+        for (let currentProject in allProjectWiseData) {
+            const currentProjectData = allProjectWiseData[currentProject];
+            const passedTestCases = currentProjectData.filter((testCase) => {
+                return testCase.executionStatus === "PASSED"
+            });
+            const failedTestCases = currentProjectData.filter((testCase) => {
+                return testCase.executionStatus === "FAILED"
+            });
+            const pieChartData = [
+                { project: currentProject, name: 'Passed', value: passedTestCases.length },
+                { project: currentProject, name: 'Failed', value: failedTestCases.length },
+            ];
+            allPieChartsData.push(pieChartData);
+        }
+        console.log(allPieChartsData)
+        setPieChartsData(allPieChartsData);
+    };
 
 
     const showExceptionDialog = (failureReason) => {
@@ -296,39 +329,53 @@ const TestCaseReport = () => {
     //     setPieChartData(pieChartData);
     // };
 
+    // const updatePieChartData = () => {
+    //     console.log("currentTestCaseData", currentTestCaseData)
+    //     const projectMap = {};
+    //     const filteredData = currentTestCaseData.filter(item => item.project);
+
+    //     filteredData.forEach(item => {
+    //         const projectName = item.project;
+    //         if (!projectMap[projectName]) {
+    //             projectMap[projectName] = {
+    //                 passed: 0,
+    //                 failed: 0
+    //             };
+    //         }
+
+    //         if (item.executionStatus === 'PASSED') {
+    //             projectMap[projectName].passed++;
+    //         } else {
+    //             projectMap[projectName].failed++;
+    //         }
+    //     });
+
     const updatePieChartData = () => {
-        console.log("currentTestCaseData", currentTestCaseData)
-        const projectMap = {};
-        const filteredData = currentTestCaseData.filter(item => item.project);
-
-        filteredData.forEach(item => {
-            const projectName = item.project;
-            if (!projectMap[projectName]) {
-                projectMap[projectName] = {
-                    passed: 0,
-                    failed: 0
-                };
-            }
-
-            if (item.executionStatus === 'PASSED') {
-                projectMap[projectName].passed++;
-            } else {
-                projectMap[projectName].failed++;
-            }
+        const passedTestCases = currentTestCaseData.filter((testCase) => {
+            return testCase.executionStatus === "PASSED"
         });
-
-        const chartData = Object.keys(projectMap).map(projectName => {
-            const { passed, failed } = projectMap[projectName];
-            const total = passed + failed;
-            return {
-                name: projectName,
-                passedPercentage: (passed / total) * 100,
-                failedPercentage: (failed / total) * 100
-            };
+        const failedTestCases = currentTestCaseData.filter((testCase) => {
+            return testCase.executionStatus === "FAILED"
         });
-        console.log("chartData", chartData)
-        setPieChartData(chartData);
+        const pieChartData = [
+            { name: 'Passed', value: passedTestCases.length },
+            { name: 'Failed', value: failedTestCases.length },
+        ];
+        setPieChartData(pieChartData);
     };
+
+    //     const chartData = Object.keys(projectMap).map(projectName => {
+    //         const { passed, failed } = projectMap[projectName];
+    //         const total = passed + failed;
+    //         return {
+    //             name: projectName,
+    //             passedPercentage: (passed / total) * 100,
+    //             failedPercentage: (failed / total) * 100
+    //         };
+    //     });
+    //     console.log("chartData", chartData)
+    //     setPieChartData(chartData);
+    // };
 
     const handleDropdownChange = (id, value) => {
         if (id === "project") {
@@ -523,8 +570,24 @@ const TestCaseReport = () => {
                         customStyles={dropdownCustomStyles}
                     /> */}
                 </div>
-                <div>
+                {/* <div>
                     <PieChartComponent data={pieChartData} />
+                </div> */}
+                <div className="pie-charts-container">
+                    {
+                        pieChartsData.map((pieChartData, index) => {
+                            return (
+                                <div key={index}>
+                                    {
+                                        (pieChartData && pieChartData.length) && (
+                                            <div>{pieChartData[0].project}</div>
+                                        )
+                                    }
+                                    <PieChartComponent data={pieChartData} />
+                                </div>
+                            )
+                        })
+                    }
                 </div>
             </>
         )
